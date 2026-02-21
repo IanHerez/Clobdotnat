@@ -1,8 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { Wifi } from "lucide-react"
-import { useMonadStats } from "@/hooks/use-monad-stats"
+import { useEffect, useState } from "react"
+import { Wifi, Zap } from "lucide-react"
 
 function GlitchLogo() {
   return (
@@ -17,49 +16,46 @@ function GlitchLogo() {
   )
 }
 
-function StatusIndicator({ label, value, color = "text-foreground" }: {
+function StatusIndicator({ label, value, color = "text-foreground", flicker = false }: {
   label: string
   value: string
   color?: string
+  flicker?: boolean
 }) {
   return (
     <div className="flex items-center gap-1.5 text-xs">
       <span className="text-muted-foreground uppercase tracking-wider">{label}:</span>
-      <span className={`${color} font-semibold tabular-nums`}>
+      <span className={`${color} ${flicker ? "flicker" : ""} font-semibold`}>
         {value}
       </span>
     </div>
   )
 }
 
-function TpsDisplay({ tps }: { tps: number }) {
-  const [flash, setFlash] = useState(false)
-  const prevTps = useRef(tps)
+function TpsCounter() {
+  const [tps, setTps] = useState(9450)
 
   useEffect(() => {
-    if (tps !== prevTps.current) {
-      prevTps.current = tps
-      setFlash(true)
-      const timeout = setTimeout(() => setFlash(false), 400)
-      return () => clearTimeout(timeout)
-    }
-  }, [tps])
+    const interval = setInterval(() => {
+      setTps(prev => {
+        const delta = Math.floor(Math.random() * 200) - 100
+        return Math.max(8800, Math.min(10200, prev + delta))
+      })
+    }, 100)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
-    <div className="flex items-center gap-1.5 text-xs">
-      <span className="text-muted-foreground uppercase tracking-wider">TPS:</span>
-      <span
-        className={`text-[#00FF9D] font-semibold tabular-nums text-glow-green ${flash ? "tps-flash" : ""}`}
-      >
-        {tps.toLocaleString()}
-      </span>
-    </div>
+    <StatusIndicator
+      label="TPS"
+      value={tps.toLocaleString()}
+      color="text-[#00FF9D]"
+      flicker
+    />
   )
 }
 
 export function HudNavbar() {
-  const stats = useMonadStats()
-
   return (
     <header className="flex items-center justify-between h-12 px-4 border-b border-[#836EF9]/30 bg-[#0E0E12]/90 backdrop-blur-sm shrink-0">
       {/* Left: Logo */}
@@ -74,36 +70,24 @@ export function HudNavbar() {
       {/* Center: Status Metrics */}
       <div className="hidden md:flex items-center gap-6">
         <div className="flex items-center gap-1.5 text-xs">
-          <span className="text-muted-foreground uppercase tracking-wider">NET:</span>
+          <span className="text-muted-foreground uppercase tracking-wider">RED:</span>
           <div className="flex items-center gap-1.5">
-            <div className={`w-1.5 h-1.5 rounded-full ${stats.isLive ? "bg-[#00FF9D] pulse-dot" : "bg-yellow-500 pulse-dot"}`} />
-            <span className={`font-semibold tabular-nums ${stats.isLive ? "text-[#00FF9D]" : "text-yellow-500"}`}>
-              {stats.isLive ? "MONAD TESTNET" : "DEMO MODE"}
-            </span>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#00FF9D] pulse-dot" />
+            <span className="text-[#00FF9D] font-semibold">MONAD TESTNET</span>
           </div>
         </div>
         <div className="h-4 w-px bg-[#2A2A3A]" />
-        <TpsDisplay tps={stats.tps} />
+        <TpsCounter />
         <div className="h-4 w-px bg-[#2A2A3A]" />
-        <StatusIndicator
-          label="BLOCK"
-          value={stats.blockHeight > 0 ? `#${stats.blockHeight.toLocaleString()}` : "---"}
-          color="text-foreground"
-        />
+        <StatusIndicator label="TIEMPO BLOQUE" value="1s" color="text-foreground" />
         <div className="h-4 w-px bg-[#2A2A3A]" />
-        <StatusIndicator label="BLOCK TIME" value={stats.blockTime} color="text-foreground" />
-        <div className="h-4 w-px bg-[#2A2A3A]" />
-        <StatusIndicator
-          label="GAS"
-          value={`${stats.gasPrice} Gwei`}
-          color="text-muted-foreground"
-        />
+        <StatusIndicator label="GAS PROM" value="$0.0001" color="text-muted-foreground" />
       </div>
 
       {/* Right: Connect Wallet */}
       <button className="flex items-center gap-2 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider border border-[#836EF9] text-[#836EF9] bg-[#836EF9]/10 rounded-sm glow-purple hover:bg-[#836EF9]/20 transition-colors cursor-pointer">
         <Wifi className="w-3.5 h-3.5" />
-        Connect Wallet
+        Conectar Wallet
       </button>
     </header>
   )

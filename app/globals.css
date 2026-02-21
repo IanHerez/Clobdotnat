@@ -208,16 +208,6 @@
   animation: flicker 0.15s infinite;
 }
 
-/* TPS update flash */
-@keyframes tps-flash {
-  0% { text-shadow: 0 0 12px rgba(0, 255, 157, 0.9), 0 0 30px rgba(0, 255, 157, 0.5); }
-  100% { text-shadow: 0 0 10px rgba(0, 255, 157, 0.6), 0 0 30px rgba(0, 255, 157, 0.2); }
-}
-
-.tps-flash {
-  animation: tps-flash 0.4s ease-out;
-}
-
 /* Price flash */
 @keyframes price-flash-green {
   0% { background-color: rgba(0, 255, 157, 0.3); }
