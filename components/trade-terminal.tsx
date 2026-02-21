@@ -32,9 +32,12 @@ export function TradeTerminal() {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy")
   const [limitPrice, setLimitPrice] = useState("142.50")
   const [amount, setAmount] = useState("")
-  const [logs, setLogs] = useState<LogEntry[]>(() =>
-    Array.from({ length: 5 }, () => generateLog())
-  )
+  const [logs, setLogs] = useState<LogEntry[]>([])
+
+  // Generate initial logs on client only to avoid hydration mismatch
+  useEffect(() => {
+    setLogs(Array.from({ length: 5 }, () => generateLog()))
+  }, [])
   const logContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

@@ -52,10 +52,16 @@ function OrderRow({ order, side, maxTotal }: { order: Order; side: "ask" | "bid"
 
 export function OrderBook() {
   const basePrice = useRef(142.5)
-  const [asks, setAsks] = useState<Order[]>(() => generateOrders(basePrice.current, "ask", 14))
-  const [bids, setBids] = useState<Order[]>(() => generateOrders(basePrice.current, "bid", 14))
+  const [asks, setAsks] = useState<Order[]>([])
+  const [bids, setBids] = useState<Order[]>([])
   const [spread, setSpread] = useState(0.05)
   const [midPrice, setMidPrice] = useState(basePrice.current)
+
+  // Generate initial orders on client only to avoid hydration mismatch
+  useEffect(() => {
+    setAsks(generateOrders(basePrice.current, "ask", 14))
+    setBids(generateOrders(basePrice.current, "bid", 14))
+  }, [])
 
   const updateOrders = useCallback(() => {
     // Randomly mutate existing orders and occasionally add/remove

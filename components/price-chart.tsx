@@ -44,14 +44,22 @@ function generateMA(candles: Candle[], period: number): number[] {
 export function PriceChart() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [candles, setCandles] = useState<Candle[]>(() => generateCandles(60))
+  const [candles, setCandles] = useState<Candle[]>([])
   const [currentPrice, setCurrentPrice] = useState(142.5)
   const [priceChange, setPriceChange] = useState(2.34)
+  const [volume, setVolume] = useState("250")
+  const [mounted, setMounted] = useState(false)
+
+  // Generate initial candles on the client only to avoid hydration mismatch
+  useEffect(() => {
+    setCandles(generateCandles(60))
+    setMounted(true)
+  }, [])
 
   const drawChart = useCallback(() => {
     const canvas = canvasRef.current
     const container = containerRef.current
-    if (!canvas || !container) return
+    if (!canvas || !container || candles.length === 0) return
 
     const rect = container.getBoundingClientRect()
     const dpr = window.devicePixelRatio || 1
@@ -203,6 +211,7 @@ export function PriceChart() {
         updated[updated.length - 1] = last
         setCurrentPrice(last.close)
         setPriceChange(((last.close - last.open) / last.open) * 100)
+        setVolume((Math.random() * 500 + 100).toFixed(0))
         return updated
       })
     }, 500)
@@ -276,7 +285,7 @@ export function PriceChart() {
         <span className="text-muted-foreground">MA(25)</span>
         <span className="text-[#836EF9]/60">{(currentPrice - 0.8).toFixed(2)}</span>
         <span className="text-muted-foreground">VOL</span>
-        <span className="text-foreground">{(Math.random() * 500 + 100).toFixed(0)}K</span>
+        <span className="text-foreground">{volume}K</span>
       </div>
 
       {/* Canvas */}
